@@ -8,15 +8,30 @@ import userRoutes from "./routes/userRoutes.js";
 dotenv.config();
 
 const app = express();
+const normalizeOrigin = (value) => value.replace(/\/+$/, "");
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
   .split(",")
   .map((item) => item.trim())
+  .map((item) => normalizeOrigin(item))
   .filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      const normalizedOrigin = origin ? normalizeOrigin(origin) : "";
+      let isVercelPreview = false;
+      if (normalizedOrigin) {
+        try {
+          isVercelPreview = /\.vercel\.app$/.test(new URL(normalizedOrigin).hostname);
+        } catch {
+          isVercelPreview = false;
+        }
+      }
+      if (
+        !normalizedOrigin ||
+        allowedOrigins.includes(normalizedOrigin) ||
+        isVercelPreview
+      ) {
         return callback(null, true);
       }
       return callback(new Error("CORS blocked"));

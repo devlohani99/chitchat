@@ -5,14 +5,16 @@ import { connectDB } from "./config/db.js";
 
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
+const normalizeOrigin = (value) => value.replace(/\/+$/, "");
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
   .split(",")
   .map((item) => item.trim())
+  .map((item) => normalizeOrigin(item))
   .filter(Boolean);
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: [...allowedOrigins, /\.vercel\.app$/],
     methods: ["GET", "POST"]
   }
 });
