@@ -12,10 +12,30 @@ const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
   .map((item) => normalizeOrigin(item))
   .filter(Boolean);
 
+import jwt from "jsonwebtoken";
+
 const io = new Server(server, {
   cors: {
     origin: [...allowedOrigins, /\.vercel\.app$/],
     methods: ["GET", "POST"]
+  }
+});
+
+// Socket.IO Authentication Middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(" ")[1];
+  
+  if (!token) {
+    return next(new Error("Authentication error: Token missing"));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.id; // Matches the id from signToken payload
+    socket.user = decoded;
+    next();
+  } catch (err) {
+    return next(new Error("Authentication error: Invalid token"));
   }
 });
 

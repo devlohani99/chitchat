@@ -199,6 +199,7 @@ const App = () => {
 
   useEffect(() => {
     if (!token || !user) return;
+    socket.auth = { token };
     socket.connect();
     socket.emit("join_user", user.id);
     return () => socket.disconnect();
@@ -552,8 +553,8 @@ const App = () => {
           </div>
         </aside>
 
-        <section className="flex flex-col bg-[#f9fafb]">
-          <header className="border-b border-slate-200 px-5 py-3 bg-white">
+        <section className="flex flex-col bg-[#f9fafb] h-full overflow-hidden">
+          <header className="border-b border-slate-200 px-5 py-3 bg-white shrink-0">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="h-9 w-9 rounded-full bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center">
@@ -638,7 +639,7 @@ const App = () => {
             })}
           </main>
 
-          <footer className="border-t border-slate-200 p-3 space-y-2 bg-white">
+          <footer className="border-t border-slate-200 p-3 space-y-2 bg-white shrink-0">
             {!!smartReplies.length && (
               <div className="space-y-1.5">
                 {smartReplies.map((item, index) => (
